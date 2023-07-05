@@ -14,7 +14,7 @@ entity vending_machine is
 		choice : in std_logic;
 		P : out std_logic_vector(7 downto 0); --Display
 		E : out std_logic_vector(7 downto 0); --return change
-		D : out std_logic_vector(1 downto 0) --soda dispensation
+		D : out std_logic_vector(1 downto 0) --item dispensation
 		);
 end vending_machine;
 
@@ -55,7 +55,7 @@ component mux21 is
 		);
 end component;
 
-type FSMTYPE is (INIT_STATE, Coin_Reception, soda_dispensation);
+type FSMTYPE is (INIT_STATE, Coin_Reception, item_dispensation);
 
 signal CSTATE, NSTATE : FSMTYPE;
 signal balance, price, price_reg, coins_to_return : std_logic_vector(7 downto 0);
@@ -86,7 +86,7 @@ begin
         end if ;
     end process ; -- state_registration
 
-	soda_dispensation_proc: process(clk)
+	item_dispensation_proc: process(clk)
 	begin
 		if (CLK'event and CLK = '1') then
 			if (dispensation_EN = '1') then
@@ -99,7 +99,7 @@ begin
 				D <= "00";
 			end if;
 		end if;
-	end process; --soda_dispensation_Proc;
+	end process; --item_dispensation_Proc;
 
 	next_state : process( CSTATE, balance, C, balance_equal, balance_greater, coins_to_return)
     begin
@@ -123,10 +123,10 @@ begin
             when Coin_Reception =>
 				P <= balance;
                 if (balance_equal = '1' or balance_greater = '1') then
-                    NSTATE <= soda_dispensation ;
+                    NSTATE <= item_dispensation ;
                 end if ;
             
-            when soda_dispensation =>
+            when item_dispensation =>
 				dispensation_EN <= '1';
 				E <= coins_to_return;
 				nRST_acc <= '0';
